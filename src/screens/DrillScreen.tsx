@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
+  Image,
 } from "react-native";
 import Staff from "../components/Staff";
 import { usePitchDetection } from "../hooks/usePitchDetection";
@@ -113,7 +114,10 @@ export default function DrillScreen({ exercise, level, isActive }: DrillScreenPr
         style={[styles.flashOverlay, { opacity: flashOpacity }]}
       />
       <View style={styles.header}>
-        <Text style={styles.title}>Piano Drillz</Text>
+        <View style={styles.titleRow}>
+          <Image source={require("../../logo.png")} style={styles.logo} />
+          <Text style={styles.title}>Piano Drillz</Text>
+        </View>
         <Text style={styles.subtitle}>
           {exercise.name} — {level.label}
         </Text>
@@ -282,19 +286,31 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
   },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  logo: {
+    width: 36,
+    height: 36,
+    resizeMode: "contain",
+  },
   title: {
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: "Jost_800ExtraBold",
     color: "#f8fafc",
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: "Jost_400Regular",
     color: "#94a3b8",
     marginTop: 4,
   },
   levelDetail: {
     fontSize: 12,
+    fontFamily: "Jost_400Regular",
     color: "#64748b",
     marginTop: 2,
   },
@@ -309,13 +325,14 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: "Jost_600SemiBold",
     color: "#64748b",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   statValue: {
     fontSize: 32,
-    fontWeight: "700",
+    fontFamily: "Jost_700Bold",
     color: "#f8fafc",
     fontVariant: ["tabular-nums"],
     marginTop: 2,
@@ -330,15 +347,17 @@ const styles = StyleSheet.create({
   },
   playText: {
     fontSize: 20,
+    fontFamily: "Jost_400Regular",
     color: "#cbd5e1",
   },
   noteName: {
     fontSize: 24,
-    fontWeight: "700",
+    fontFamily: "Jost_700Bold",
     color: "#2563eb",
   },
   hearingText: {
     fontSize: 14,
+    fontFamily: "Jost_400Regular",
     color: "#64748b",
     marginTop: 6,
   },
@@ -349,7 +368,7 @@ const styles = StyleSheet.create({
   },
   revealText: {
     fontSize: 24,
-    fontWeight: "700",
+    fontFamily: "Jost_700Bold",
     color: "#22c55e",
   },
   toggleButton: {
@@ -360,7 +379,7 @@ const styles = StyleSheet.create({
   },
   toggleButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "Jost_600SemiBold",
     color: "#94a3b8",
   },
   messageContainer: {
@@ -370,6 +389,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+    fontFamily: "Jost_400Regular",
     color: "#94a3b8",
     textAlign: "center",
     lineHeight: 24,
@@ -383,12 +403,13 @@ const styles = StyleSheet.create({
   },
   completeTitle: {
     fontSize: 28,
-    fontWeight: "800",
+    fontFamily: "Jost_800ExtraBold",
     color: "#22c55e",
     marginTop: 8,
   },
   completeStats: {
     fontSize: 18,
+    fontFamily: "Jost_400Regular",
     color: "#94a3b8",
     marginTop: 4,
   },
@@ -409,7 +430,7 @@ const styles = StyleSheet.create({
   },
   startButtonText: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Jost_700Bold",
     color: "#ffffff",
   },
   resetButton: {
@@ -422,7 +443,7 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     fontSize: 16,
-    fontWeight: "600",
+    fontFamily: "Jost_600SemiBold",
     color: "#94a3b8",
   },
   audioMeter: {
@@ -443,16 +464,19 @@ const styles = StyleSheet.create({
   },
   micText: {
     fontSize: 12,
+    fontFamily: "Jost_400Regular",
     color: "#64748b",
     flex: 1,
   },
   freqText: {
     fontSize: 12,
+    fontFamily: "Jost_400Regular",
     color: "#94a3b8",
     fontVariant: ["tabular-nums"],
   },
   freqTextQuiet: {
     fontSize: 12,
+    fontFamily: "Jost_400Regular",
     color: "#334155",
   },
   levelBarBg: {

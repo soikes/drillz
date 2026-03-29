@@ -4,7 +4,7 @@
     "slug": "drillz",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./logo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -32,7 +32,8 @@
     },
     "plugins": [
       "react-native-audio-api",
-      "expo-build-properties"
+      "expo-build-properties",
+      "expo-font"
     ]
   }
 }
