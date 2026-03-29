@@ -1,17 +1,17 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   Dimensions,
   Animated,
 } from "react-native";
 import Staff from "../components/Staff";
 import { usePitchDetection } from "../hooks/usePitchDetection";
 import { useDrill } from "../hooks/useDrill";
-import { noteLabel, findClosestNote, LEVEL_1_NOTES } from "../constants/notes";
+import { noteLabel, findClosestNote } from "../constants/notes";
+import { Exercise, ExerciseLevel } from "../data/exercises";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -21,10 +21,22 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function DrillScreen() {
+interface DrillScreenProps {
+  exercise: Exercise;
+  level: ExerciseLevel;
+  isActive: boolean;
+}
+
+export default function DrillScreen({ exercise, level, isActive }: DrillScreenProps) {
   const pitch = usePitchDetection();
-  const drill = useDrill();
+  const drill = useDrill(level.notes);
   const flashOpacity = useRef(new Animated.Value(0)).current;
+  const [showNoteNames, setShowNoteNames] = useState(true);
+
+  // Fade-up animation for note reveal when names are hidden
+  const revealOpacity = useRef(new Animated.Value(0)).current;
+  const revealTranslateY = useRef(new Animated.Value(0)).current;
+  const [revealNoteName, setRevealNoteName] = useState<string | null>(null);
 
   // Feed detected frequency into drill logic
   useEffect(() => {
@@ -44,6 +56,26 @@ export default function DrillScreen() {
     }).start();
   }, [drill.correctHitCount]);
 
+  // Fade-up note name reveal on correct hit when names are hidden
+  useEffect(() => {
+    if (drill.correctHitCount === 0 || showNoteNames || !drill.lastHitNote) return;
+    setRevealNoteName(noteLabel(drill.lastHitNote));
+    revealOpacity.setValue(1);
+    revealTranslateY.setValue(0);
+    Animated.parallel([
+      Animated.timing(revealOpacity, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(revealTranslateY, {
+        toValue: -30,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [drill.correctHitCount]);
+
   const handleStart = () => {
     drill.start();
     pitch.startListening();
@@ -61,12 +93,20 @@ export default function DrillScreen() {
     }
   }, [drill.state]);
 
+  // Stop listening when screen becomes inactive
+  useEffect(() => {
+    if (!isActive && pitch.isListening) {
+      pitch.stopListening();
+      drill.reset();
+    }
+  }, [isActive]);
+
   const detectedNote = pitch.frequency
-    ? findClosestNote(pitch.frequency, LEVEL_1_NOTES)
+    ? findClosestNote(pitch.frequency, level.notes)
     : null;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {/* Green flash overlay on correct note */}
       <Animated.View
         pointerEvents="none"
@@ -74,7 +114,10 @@ export default function DrillScreen() {
       />
       <View style={styles.header}>
         <Text style={styles.title}>Piano Drillz</Text>
-        <Text style={styles.subtitle}>Treble Clef - Level 1</Text>
+        <Text style={styles.subtitle}>
+          {exercise.name} — {level.label}
+        </Text>
+        <Text style={styles.levelDetail}>{level.subtitle}</Text>
       </View>
 
       {/* Stats bar */}
@@ -99,13 +142,33 @@ export default function DrillScreen() {
       {/* Note helper */}
       {drill.state === "running" && drill.currentNote && (
         <View style={styles.noteInfo}>
-          <Text style={styles.playText}>
-            Play: <Text style={styles.noteName}>{noteLabel(drill.currentNote)}</Text>
-          </Text>
-          {detectedNote && (
-            <Text style={styles.hearingText}>
-              Hearing: {noteLabel(detectedNote)} ({Math.round(pitch.frequency!)} Hz)
-            </Text>
+          {showNoteNames ? (
+            <>
+              <Text style={styles.playText}>
+                Play: <Text style={styles.noteName}>{noteLabel(drill.currentNote)}</Text>
+              </Text>
+              {detectedNote && (
+                <Text style={styles.hearingText}>
+                  Hearing: {noteLabel(detectedNote)} ({Math.round(pitch.frequency!)} Hz)
+                </Text>
+              )}
+            </>
+          ) : (
+            <View style={styles.revealContainer}>
+              {revealNoteName && (
+                <Animated.Text
+                  style={[
+                    styles.revealText,
+                    {
+                      opacity: revealOpacity,
+                      transform: [{ translateY: revealTranslateY }],
+                    },
+                  ]}
+                >
+                  {revealNoteName}
+                </Animated.Text>
+              )}
+            </View>
           )}
         </View>
       )}
@@ -114,7 +177,7 @@ export default function DrillScreen() {
       {drill.state === "idle" && (
         <View style={styles.messageContainer}>
           <Text style={styles.messageText}>
-            Play through all 8 notes (C4–C5) as fast as you can!
+            Play through all {level.notes.length} notes as fast as you can!
           </Text>
         </View>
       )}
@@ -139,9 +202,19 @@ export default function DrillScreen() {
           </TouchableOpacity>
         )}
         {drill.state === "running" && (
-          <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
-            <Text style={styles.resetButtonText}>Stop</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity
+              style={styles.toggleButton}
+              onPress={() => setShowNoteNames((v) => !v)}
+            >
+              <Text style={styles.toggleButtonText}>
+                {showNoteNames ? "Hide Notes" : "Show Notes"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.resetButton, { marginTop: 12 }]} onPress={handleReset}>
+              <Text style={styles.resetButtonText}>Stop</Text>
+            </TouchableOpacity>
+          </>
         )}
         {drill.state === "complete" && (
           <View style={styles.completeButtons}>
@@ -190,7 +263,7 @@ export default function DrillScreen() {
           </View>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -219,6 +292,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#94a3b8",
     marginTop: 4,
+  },
+  levelDetail: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 2,
   },
   statsBar: {
     flexDirection: "row",
@@ -263,6 +341,27 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#64748b",
     marginTop: 6,
+  },
+  revealContainer: {
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  revealText: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#22c55e",
+  },
+  toggleButton: {
+    backgroundColor: "#1e293b",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  toggleButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#94a3b8",
   },
   messageContainer: {
     alignItems: "center",

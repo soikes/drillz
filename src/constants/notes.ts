@@ -6,17 +6,67 @@ export interface Note {
   staffPosition: number;
   /** Whether this note sits on a ledger line */
   needsLedgerLine: boolean;
+  /** Sharp or flat accidental, if any */
+  accidental?: "sharp" | "flat";
 }
 
 export const LEVEL_1_NOTES: Note[] = [
-  { name: "C", octave: 4, frequency: 261.63, staffPosition: -2, needsLedgerLine: true },
-  { name: "D", octave: 4, frequency: 293.66, staffPosition: -1, needsLedgerLine: false },
-  { name: "E", octave: 4, frequency: 329.63, staffPosition: 0, needsLedgerLine: false },
-  { name: "F", octave: 4, frequency: 349.23, staffPosition: 1, needsLedgerLine: false },
-  { name: "G", octave: 4, frequency: 392.0, staffPosition: 2, needsLedgerLine: false },
-  { name: "A", octave: 4, frequency: 440.0, staffPosition: 3, needsLedgerLine: false },
-  { name: "B", octave: 4, frequency: 493.88, staffPosition: 4, needsLedgerLine: false },
-  { name: "C", octave: 5, frequency: 523.25, staffPosition: 5, needsLedgerLine: false },
+  {
+    name: "C",
+    octave: 4,
+    frequency: 261.63,
+    staffPosition: -2,
+    needsLedgerLine: true,
+  },
+  {
+    name: "D",
+    octave: 4,
+    frequency: 293.66,
+    staffPosition: -1,
+    needsLedgerLine: false,
+  },
+  {
+    name: "E",
+    octave: 4,
+    frequency: 329.63,
+    staffPosition: 0,
+    needsLedgerLine: false,
+  },
+  {
+    name: "F",
+    octave: 4,
+    frequency: 349.23,
+    staffPosition: 1,
+    needsLedgerLine: false,
+  },
+  {
+    name: "G",
+    octave: 4,
+    frequency: 392.0,
+    staffPosition: 2,
+    needsLedgerLine: false,
+  },
+  {
+    name: "A",
+    octave: 4,
+    frequency: 440.0,
+    staffPosition: 3,
+    needsLedgerLine: false,
+  },
+  {
+    name: "B",
+    octave: 4,
+    frequency: 493.88,
+    staffPosition: 4,
+    needsLedgerLine: false,
+  },
+  {
+    name: "C",
+    octave: 5,
+    frequency: 523.25,
+    staffPosition: 5,
+    needsLedgerLine: false,
+  },
 ];
 
 export function noteLabel(note: Note): string {
@@ -28,16 +78,13 @@ export function centsDistance(f1: number, f2: number): number {
   return Math.abs(12 * Math.log2(f1 / f2));
 }
 
-/** Check if a detected frequency matches a target note (within 1.5 semitones) */
+/** Check if a detected frequency matches a target note (within 0.25 semitones) */
 export function isNoteMatch(detectedFreq: number, targetNote: Note): boolean {
-  return centsDistance(detectedFreq, targetNote.frequency) < 1.5;
+  return centsDistance(detectedFreq, targetNote.frequency) < 0.25;
 }
 
 /** Find the closest note from a list given a frequency */
-export function findClosestNote(
-  frequency: number,
-  notes: Note[]
-): Note | null {
+export function findClosestNote(frequency: number, notes: Note[]): Note | null {
   let closest: Note | null = null;
   let minDistance = Infinity;
 

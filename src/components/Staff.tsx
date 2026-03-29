@@ -23,6 +23,29 @@ const CLEF_SVG_MIN_Y = 5608;
 const CLEF_SVG_WIDTH = 1435; // 2621 - 1186
 const CLEF_SVG_HEIGHT = 4066; // 9674 - 5608
 
+/**
+ * Returns staffPositions where ledger lines should be drawn.
+ * Staff lines are at positions 0 (E4), 2 (G4), 4 (B4), 6 (D5), 8 (F5).
+ * Below staff: even positions below 0 (i.e. -2 for C4, -4 for A3, etc.)
+ * Above staff: even positions above 8 (i.e. 10 for A5, etc.)
+ */
+function getLedgerLines(staffPosition: number): number[] {
+  const lines: number[] = [];
+  if (staffPosition <= -2) {
+    // Below staff: ledger lines at -2, -4, -6, ... down to the note
+    for (let pos = -2; pos >= staffPosition; pos -= 2) {
+      lines.push(pos);
+    }
+  }
+  if (staffPosition >= 10) {
+    // Above staff: ledger lines at 10, 12, ... up to the note
+    for (let pos = 10; pos <= staffPosition; pos += 2) {
+      lines.push(pos);
+    }
+  }
+  return lines;
+}
+
 export default function Staff({
   currentNote,
   width = 340,
@@ -77,17 +100,18 @@ export default function Staff({
         {/* Current note */}
         {currentNote && (
           <G>
-            {/* Ledger line for C4 (below staff) */}
-            {currentNote.needsLedgerLine && (
+            {/* Ledger lines for notes outside the staff */}
+            {getLedgerLines(currentNote.staffPosition).map((pos) => (
               <Line
+                key={`ledger-${pos}`}
                 x1={noteX - 22}
-                y1={noteY(currentNote.staffPosition)}
+                y1={noteY(pos)}
                 x2={noteX + 22}
-                y2={noteY(currentNote.staffPosition)}
+                y2={noteY(pos)}
                 stroke={STAFF_COLOR}
                 strokeWidth={LINE_WIDTH}
               />
-            )}
+            ))}
 
             {/* Note head (filled ellipse) */}
             <Ellipse
