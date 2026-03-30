@@ -61,6 +61,7 @@ const LEVEL_5: Note[] = [
 export const trebleNoteReading: Exercise = {
   id: "treble-note-reading",
   name: "Treble Clef",
+  clef: "treble",
   levels: [
     { id: "treble-1", label: "Level 1", subtitle: "C4–C5 naturals", notes: LEVEL_1 },
     { id: "treble-2", label: "Level 2", subtitle: "B3–D5 naturals", notes: LEVEL_2 },

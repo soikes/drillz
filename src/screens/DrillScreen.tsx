@@ -140,7 +140,7 @@ export default function DrillScreen({ exercise, level, isActive }: DrillScreenPr
 
       {/* Staff */}
       <View style={styles.staffContainer}>
-        <Staff currentNote={drill.currentNote} width={SCREEN_WIDTH - 40} height={220} />
+        <Staff currentNote={drill.currentNote} clef={exercise.clef} width={SCREEN_WIDTH - 40} height={220} />
       </View>
 
       {/* Note helper */}
